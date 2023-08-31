@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <cstdlib>
 #include <conio.h>
+#include <vector>
+
 
 int compShipsMap[10][10]{};
 int gamerShipsMap[10][10]{};
@@ -14,14 +16,163 @@ void clearFilds();
 void drawCompShips();
 int calcEmptyCells();
 void drawGamerShips();
+void arrangementOfShipsComp_1(int& n, int& Cx, int& Cy);
+void arrangementOfShipsComp_2(int& n, int& Cx, int& Cy);
+void arrangementOfShipsComp_3(int& n, int& Cx, int& Cy);
+void arrangementOfShipsComp_4(int& n, int& Cx, int& Cy);
+void arrangementOfShipsComp_5(int& n, int& Cx, int& Cy);
 void arrangementOfShipsComp();
 void WelcomeScreen();
+void arrangementOfShipsGamer_1(int& n, int& Cx, int& Cy);
+void arrangementOfShipsGamer_2(int& n, int& Cx, int& Cy);
+void arrangementOfShipsGamer_3(int& n, int& Cx, int& Cy);
+void arrangementOfShipsGamer_4(int& n, int& Cx, int& Cy);
+void arrangementOfShipsGamer_5(int& n, int& Cx, int& Cy);
 void arrangementOfShipsGamer();
-void gamerShooting();
-int compShooting();
+void Col(int bg, int txt);
+void setcur(int x, int y);
 int calcGamerShips();
 int calcCompShips();
+
+class DrawScreen {
+private:
+	const int size_ = 10;
+	int** arrGamer_;
+	int** arrComp_;
+
+public:
+	DrawScreen() : arrGamer_(nullptr), arrComp_(nullptr) {
+		arrGamer_ = new int* [size_] {};
+		for (int i = 0; i < size_; i++) {
+			arrGamer_[i] = new int[size_] {};
+		}
+		arrComp_ = new int* [size_];
+		for (int i = 0; i < size_; i++) {
+			arrComp_[i] = new int[size_] {};
+		}
+	}
+
+	void InitScreen() {
+		drawCompShips();
+		drawGamerShips();
+		for (int i = 0; i < size_; i++) {
+			for (int j = 0; j < size_; j++) {
+				arrGamer_[i][j] = gamerShipsMap[i][j];
+			}
+		}
+
+		for (int i = 0; i < size_; i++) {
+			for (int j = 0; j < size_; j++) {
+				arrComp_[i][j] = compShipsMap[i][j];
+			}
+		}
+	}
+
+	void DrawMaps() {
+		// прорисовка результатов стрельбы
+		// карта компьютера
+		for (unsigned int i = 0; i < 10; ++i) {
+
+			for (unsigned int j = 0; j < 10; ++j) {
+				if (compShipsMap[i][j] != arrComp_[i][j]) { // прорисовываем только то что изменилось
+					Col(0, 9);
+					if (compShipsMap[i][j] == 0) {
+						if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (compShipsMap[i][j] == '#') {
+						if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (compShipsMap[i][j] == 'x') {
+						if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (compShipsMap[i][j] == '-') {
+						if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (compShipsMap[i][j] == '+') {
+						if (j == 9) { setcur(32, 3 + i); std::cout << " + |"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << " + "; }
+					}
+					else if (compShipsMap[i][j] == 'X') {
+						if (j == 9) { setcur(32, 3 + i); std::cout << "[X]|"; }
+						else { setcur(5 + j * 3, 3 + i); std::cout << "[X]"; }
+					}
+				}
+
+			}
+		}
+		Col(0, 7);
+		setcur(25, 14);
+		std::cout << calcCompShips() << "     ";
+
+		// карта игрока
+		for (unsigned int i = 0; i < 10; ++i) {
+			for (unsigned int j = 0; j < 10; ++j) {
+				if (gamerShipsMap[i][j] != arrGamer_[i][j]) { // прорисовываем только то что изменилось
+					Col(0, 10);
+					if (gamerShipsMap[i][j] == 0) {
+						if (j == 9) { setcur(71, 3 + i); std::cout << "   |"; }
+						else { setcur(44 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (gamerShipsMap[i][j] == '*') {
+						if (j == 9) { setcur(71, 3 + i); std::cout << "[ ]|"; }
+						else { setcur(44 + j * 3, 3 + i); std::cout << "[ ]"; }
+					}
+					else if (gamerShipsMap[i][j] == '-') {
+						if (j == 9) { setcur(71, 3 + i); std::cout << "   |"; }
+						else { setcur(44 + j * 3, 3 + i); std::cout << "   "; }
+					}
+					else if (gamerShipsMap[i][j] == '+') {
+						if (j == 9) { setcur(71, 3 + i); std::cout << " + |"; }
+						else { setcur(44 + j * 3, 3 + i); std::cout << " + "; }
+					}
+					else if (gamerShipsMap[i][j] == 'X') {
+						if (j == 9) { setcur(71, 3 + i); std::cout << "[X]|"; }
+						else { setcur(44 + j * 3, 3 + i); std::cout << "[X]"; }
+					}
+				}
+			}
+		}
+		Col(0, 7);
+		setcur(59, 14); std::cout << calcGamerShips() << "   ";
+
+		for (int i = 0; i < size_; i++) {
+			for (int j = 0; j < size_; j++) {
+				arrGamer_[i][j] = gamerShipsMap[i][j];
+			}
+		}
+
+		for (int i = 0; i < size_; i++) {
+			for (int j = 0; j < size_; j++) {
+				arrComp_[i][j] = compShipsMap[i][j];
+			}
+		}
+
+	}
+
+	~DrawScreen() {
+		if (arrGamer_ != nullptr) {
+			delete[] arrGamer_;
+			arrGamer_ = nullptr;
+		}
+		if (arrComp_ != nullptr) {
+			delete[] arrComp_;
+			arrComp_ = nullptr;
+		}
+	}
+
+};
+
+
+void gamerShooting(DrawScreen* drawScreen);
+int compShooting();
+
 point randomShooting();
+char input_menu(int low, int hi, size_t& vertMove, size_t& gorMove);
+
 point p;// координаты предыдущей стрельбы компьютера
 int compShips;
 
@@ -42,6 +193,7 @@ int main()
 		std::cin >> name;
 		std::cout << "Привет, " << name << "!\n";
 		system("pause");
+		system("cls");
 		srand((unsigned int)time(NULL));
 		arrangementOfShipsComp();
 		compShips = calcCompShips();
@@ -49,15 +201,17 @@ int main()
 		arrangementOfShipsGamer();
 		int gamerShips = calcGamerShips();
 		//std::cout << "\nНачальное количество палуб Игрока -> " << gamerShips << std::endl;
+		DrawScreen* drawScreen = new DrawScreen();
+		drawScreen->InitScreen();
 		p.raw = rand() % 10;
 		p.col = rand() % 10;
 		
-		system("cls");
+		
 		while (calcCompShips() > 0 && calcGamerShips() > 0) {
 			srand((unsigned int)time(NULL));
 		
 			// стрельба Игрока
-			gamerShooting();
+			gamerShooting(drawScreen);
 			compShips = calcCompShips();
 			
 			// Стрельба компьютера
@@ -67,13 +221,13 @@ int main()
 			} while (result);
 
 			gamerShips = calcGamerShips();
-			system("cls");
+			
 		}
-
-		if (compShips == 0)
-			std::cout << "\x1b[32mКомпьютер проиграл!\x1b[0m\n\n\n";
-		if (gamerShips == 0)
-			std::cout << "\n\n\n\x1b[31m " << name << " проиграл!\x1b[0m \n";
+		setcur(2, 16);
+		if (calcCompShips() == 0)
+			std::cout << "\x1b[32mКомпьютер проиграл!\x1b[0m";
+		if (calcGamerShips() == 0)
+			std::cout << "\x1b[31m " << name << " проиграл!\x1b[0m";
 		system("pause");
 		do {
 			system("cls");
@@ -850,7 +1004,7 @@ void setcur(int x, int y)
 
 
 
-void gamerShooting() {
+void gamerShooting(DrawScreen* drawScreen) {
 	bool result = false;
 	int compShips = 0;
 	int x, y;
@@ -862,15 +1016,13 @@ void gamerShooting() {
 		result = false;
 		char str[20];
 		x = 0; y = 0; x_ = 0; y_ = 0;
-		drawGamerShips();
-		
-		drawCompShips();
+		drawScreen->DrawMaps();
 		
 		gorCoord = 1;
 		vertCoord = 1;
 		do
 		{
-			y_ = vertCoord + 17;
+			y_ = vertCoord + 2;
 			x_ = gorCoord * 3 + 3;
 			setcur(x_, y_);
 
@@ -903,8 +1055,408 @@ void gamerShooting() {
 		// подсчёт количества оставшихся кораблей у компьютера
 		compShips = calcCompShips();
 		if (compShips == 0) break;
-		system("cls");
+		//system("cls");
 	} while (result);
+}
+
+
+/////////////////////////////////////////////////////////////// постройка пятипалубного корабля ////////////////////////////////////////////////////////////////////////
+void arrangementOfShipsComp_5(int& n, int& Cx, int& Cy) {
+	
+
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && compShipsMap[Cy + 2][Cx] == 0) &&
+			(Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 3; i <= Cy + 3; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy - 1][Cx] = '#';
+			compShipsMap[Cy + 1][Cx] = '#';
+			compShipsMap[Cy + 2][Cx] = '#';
+			compShipsMap[Cy - 2][Cx] = '#';
+			n++;
+		}
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) &&
+			(Cx + 2 >= 0 && compShipsMap[Cy][Cx + 2] == 0) && (Cx - 2 >= 0 && compShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 3; j <= Cx + 3; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx + 1] = '#';
+			compShipsMap[Cy][Cx - 1] = '#';
+			compShipsMap[Cy][Cx + 2] = '#';
+			compShipsMap[Cy][Cx - 2] = '#';
+			n++;
+		}
+
+
+	} while (n == 0);
+}
+
+//////////////////////////////////////////////////////// постройка одного однопалубного корабля ////////////////////////////////////////
+void arrangementOfShipsComp_1(int& n, int& Cx, int& Cy) {
+	
+
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+		if (compShipsMap[Cy][Cx] == 0) {
+			for (int i = Cy - 1; i < Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j < Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x'; // отметка зоны равной одной клетке вокруг корабля
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			n++;
+		}
+		else {
+			continue;
+		}
+	} while (n == 0);
+}
+
+/////////////////////////////////////////////////////// постройка одного двухпалубного корабля ///////////////////////////////////////////
+void arrangementOfShipsComp_2(int& n, int& Cx, int& Cy) {
+	
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0)) { // берём координату выше на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1 - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy - 1][Cx] = '#';
+			n++;
+		}
+		// если точка Сy - 1 занята то берём другую точку и проверяем
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0)) {// берём координату ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy; i <= Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy + 1][Cx] = '#';
+			n++;
+		}
+		// если точка Сy + 1 занята то берём другую точку и проверяем
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx + 1] = '#';
+			n++;
+		}
+		// если точка Сx + 1 занята то берём другую точку и проверяем
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 2; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx - 1] = '#';
+			n++;
+		}
+
+
+	} while (n == 0);
+}
+
+/////////////////////////////////////////////////////////////// постройка трёхпалубного корабля ////////////////////////////////////////////////////////////////////////
+void arrangementOfShipsComp_3(int& n, int& Cx, int& Cy) {
+	
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1 - 1; i <= Cy + 1 + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy - 1][Cx] = '#';
+			compShipsMap[Cy + 1][Cx] = '#';
+			n++;
+		}
+		// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1 - 1; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx + 1] = '#';
+			compShipsMap[Cy][Cx - 1] = '#';
+			n++;
+		}
+
+	} while (n == 0);
+}
+
+void arrangementOfShipsComp_4(int& n, int& Cx, int& Cy) {
+	/////////////////////////////////////////////////////////////// постройка четырёхпалубного корабля ////////////////////////////////////////////////////////////////////////
+
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && compShipsMap[Cy + 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 2; i <= Cy + 3; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy - 1][Cx] = '#';
+			compShipsMap[Cy + 1][Cx] = '#';
+			compShipsMap[Cy + 2][Cx] = '#';
+			n++;
+		}
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 3; i <= Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy - 1][Cx] = '#';
+			compShipsMap[Cy - 2][Cx] = '#';
+			compShipsMap[Cy + 1][Cx] = '#';
+			n++;
+		}
+
+		// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) && (Cx - 2 >= 0 && compShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 3; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx + 1] = '#';
+			compShipsMap[Cy][Cx - 1] = '#';
+			compShipsMap[Cy][Cx - 2] = '#';
+			n++;
+		}
+		else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) && (Cx + 2 <= 9 && compShipsMap[Cy][Cx + 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 2; j <= Cx + 3; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					compShipsMap[I][J] = 'x';
+				}
+			}
+			compShipsMap[Cy][Cx] = '#';
+			compShipsMap[Cy][Cx + 1] = '#';
+			compShipsMap[Cy][Cx - 1] = '#';
+			compShipsMap[Cy][Cx + 2] = '#';
+			n++;
+		}
+
+
+	} while (n == 0);
 }
 
 void arrangementOfShipsComp() {
@@ -913,401 +1465,34 @@ void arrangementOfShipsComp() {
 	int numberOfShips = 0;
 	do {
 		numberOfShips = 0;
+		// очистка поля компьютера
 		for (int i = 0; i < 10; ++i) {
 			for (int j = 0; j < 10; ++j) {
 				compShipsMap[i][j] = 0;
 			}
 		}
-
-		//////////////////////////////////////////////////////// постройка одного однопалубного корабля ////////////////////////////////////////
 		int n = 0;
-		do {
-			// очистка поля компьютера
 
+		arrangementOfShipsComp_4(n, Cx, Cy);
 
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-			if (compShipsMap[Cy][Cx] == 0) {
-				for (int i = Cy - 1; i < Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j < Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x'; // отметка зоны равной одной клетке вокруг корабля
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				n++;
-			}
-			else {
-				continue;
-			}
-		} while (n == 0);
+		arrangementOfShipsComp_5(n, Cx, Cy);
 
-		/////////////////////////////////////////////////////// постройка одного двухпалубного корабля ///////////////////////////////////////////
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
+		arrangementOfShipsComp_3(n, Cx, Cy);
+		arrangementOfShipsComp_3(n, Cx, Cy);
 
-			if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0)) { // берём координату выше на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+		arrangementOfShipsComp_1(n, Cx, Cy);
+		arrangementOfShipsComp_1(n, Cx, Cy);
+		arrangementOfShipsComp_1(n, Cx, Cy);
+		arrangementOfShipsComp_1(n, Cx, Cy);
 
-				for (int i = Cy - 1 - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy - 1][Cx] = '#';
-				n++;
-			}
-			// если точка Сy - 1 занята то берём другую точку и проверяем
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0)) {// берём координату ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+		arrangementOfShipsComp_2(n, Cx, Cy);
+		arrangementOfShipsComp_2(n, Cx, Cy);
+		arrangementOfShipsComp_2(n, Cx, Cy);
 
-				for (int i = Cy; i <= Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy + 1][Cx] = '#';
-				n++;
-			}
-			// если точка Сy + 1 занята то берём другую точку и проверяем
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+		
 
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx + 1] = '#';
-				n++;
-			}
-			// если точка Сx + 1 занята то берём другую точку и проверяем
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+		
 
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 2; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx - 1] = '#';
-				n++;
-			}
-
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка трёхпалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1 - 1; i <= Cy + 1 + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy - 1][Cx] = '#';
-				compShipsMap[Cy + 1][Cx] = '#';
-				n++;
-			}
-			// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1 - 1; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx + 1] = '#';
-				compShipsMap[Cy][Cx - 1] = '#';
-				n++;
-			}
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка четырёхпалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && compShipsMap[Cy + 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 2; i <= Cy + 3; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy - 1][Cx] = '#';
-				compShipsMap[Cy + 1][Cx] = '#';
-				compShipsMap[Cy + 2][Cx] = '#';
-				n++;
-			}
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 3; i <= Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy - 1][Cx] = '#';
-				compShipsMap[Cy - 2][Cx] = '#';
-				compShipsMap[Cy + 1][Cx] = '#';
-				n++;
-			}
-
-			// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) && (Cx - 2 >= 0 && compShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 3; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx + 1] = '#';
-				compShipsMap[Cy][Cx - 1] = '#';
-				compShipsMap[Cy][Cx - 2] = '#';
-				n++;
-			}
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) && (Cx + 2 <= 9 && compShipsMap[Cy][Cx + 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 2; j <= Cx + 3; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx + 1] = '#';
-				compShipsMap[Cy][Cx - 1] = '#';
-				compShipsMap[Cy][Cx + 2] = '#';
-				n++;
-			}
-
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка пятипалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((compShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && compShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && compShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && compShipsMap[Cy + 2][Cx] == 0) &&
-				(Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 3; i <= Cy + 3; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy - 1][Cx] = '#';
-				compShipsMap[Cy + 1][Cx] = '#';
-				compShipsMap[Cy + 2][Cx] = '#';
-				compShipsMap[Cy - 2][Cx] = '#';
-				n++;
-			}
-
-			else if ((compShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && compShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && compShipsMap[Cy][Cx - 1] == 0) &&
-				(Cx + 2 >= 0 && compShipsMap[Cy][Cx + 2] == 0) && (Cx - 2 >= 0 && compShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 3; j <= Cx + 3; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						compShipsMap[I][J] = 'x';
-					}
-				}
-				compShipsMap[Cy][Cx] = '#';
-				compShipsMap[Cy][Cx + 1] = '#';
-				compShipsMap[Cy][Cx - 1] = '#';
-				compShipsMap[Cy][Cx + 2] = '#';
-				compShipsMap[Cy][Cx - 2] = '#';
-				n++;
-			}
-
-
-		} while (n == 0);
 		numberOfShips = 0;
 		for (int i = 0; i <= 9; ++i) {
 			for (int j = 0; j <= 9; ++j) {
@@ -1319,9 +1504,411 @@ void arrangementOfShipsComp() {
 				}
 			}
 		}
-	} while (numberOfShips < 15);
+	} while (numberOfShips < 25);
 	
 
+}
+
+//////////////////////////////////////////////////////// постройка одного однопалубного корабля ////////////////////////////////////////
+void arrangementOfShipsGamer_1(int& n, int& Cx, int& Cy) {
+	
+	do {
+		// очистка поля игрока
+
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+		if (gamerShipsMap[Cy][Cx] == 0) {
+			for (int i = Cy - 1; i < Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j < Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-'; // отметка зоны равной одной клетке вокруг корабля
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			n++;
+		}
+		else {
+			continue;
+		}
+	} while (n == 0);
+}
+
+/////////////////////////////////////////////////////// постройка одного двухпалубного корабля ///////////////////////////////////////////
+void arrangementOfShipsGamer_2(int& n, int& Cx, int& Cy) {
+	
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0)) { // берём координату выше на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1 - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy - 1][Cx] = '*';
+			n++;
+		}
+		// если точка Сy - 1 занята то берём другую точку и проверяем
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0)) {// берём координату ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy; i <= Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy + 1][Cx] = '*';
+			n++;
+		}
+		// если точка Сy + 1 занята то берём другую точку и проверяем
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx + 1] = '*';
+			n++;
+		}
+		// если точка Сx + 1 занята то берём другую точку и проверяем
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 2; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx - 1] = '*';
+			n++;
+		}
+
+
+	} while (n == 0);
+}
+
+/////////////////////////////////////////////////////////////// постройка трёхпалубного корабля ////////////////////////////////////////////////////////////////////////
+void arrangementOfShipsGamer_3(int& n, int& Cx, int& Cy) {
+	
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1 - 1; i <= Cy + 1 + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy - 1][Cx] = '*';
+			gamerShipsMap[Cy + 1][Cx] = '*';
+			n++;
+		}
+		// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1 - 1; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx + 1] = '*';
+			gamerShipsMap[Cy][Cx - 1] = '*';
+			n++;
+		}
+
+	} while (n == 0);
+
+}
+
+/////////////////////////////////////////////////////////////// постройка четырёхпалубного корабля ////////////////////////////////////////////////////////////////////////
+void arrangementOfShipsGamer_4(int& n, int& Cx, int& Cy) {
+	
+
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && gamerShipsMap[Cy + 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 2; i <= Cy + 3; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy - 1][Cx] = '*';
+			gamerShipsMap[Cy + 1][Cx] = '*';
+			gamerShipsMap[Cy + 2][Cx] = '*';
+			n++;
+		}
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy - 2 >= 0 && gamerShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 3; i <= Cy + 2; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy - 1][Cx] = '*';
+			gamerShipsMap[Cy - 2][Cx] = '*';
+			gamerShipsMap[Cy + 1][Cx] = '*';
+			n++;
+		}
+
+		// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) && (Cx - 2 >= 0 && gamerShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 3; j <= Cx + 2; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx + 1] = '*';
+			gamerShipsMap[Cy][Cx - 1] = '*';
+			gamerShipsMap[Cy][Cx - 2] = '*';
+			n++;
+		}
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) && (Cx + 2 <= 9 && gamerShipsMap[Cy][Cx + 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 2; j <= Cx + 3; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx + 1] = '*';
+			gamerShipsMap[Cy][Cx - 1] = '*';
+			gamerShipsMap[Cy][Cx + 2] = '*';
+			n++;
+		}
+
+
+	} while (n == 0);
+}
+
+/////////////////////////////////////////////////////////////// постройка пятипалубного корабля ////////////////////////////////////////////////////////////////////////
+void arrangementOfShipsGamer_5(int& n, int& Cx, int& Cy) {
+	
+	n = 0;
+	do {
+		Cx = rand() % 10;
+		Cy = rand() % 10;
+
+		if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && gamerShipsMap[Cy + 2][Cx] == 0) &&
+			(Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 3; i <= Cy + 3; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 1; j <= Cx + 1; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy - 1][Cx] = '*';
+			gamerShipsMap[Cy + 1][Cx] = '*';
+			gamerShipsMap[Cy + 2][Cx] = '*';
+			gamerShipsMap[Cy - 2][Cx] = '*';
+			n++;
+		}
+
+		else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) &&
+			(Cx + 2 >= 0 && gamerShipsMap[Cy][Cx + 2] == 0) && (Cx - 2 >= 0 && gamerShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+
+			for (int i = Cy - 1; i <= Cy + 1; ++i) {
+				int I, J;
+				if (i < 0)
+					I = 0;
+				else if (i > 9)
+					I = 9;
+				else
+					I = i;
+				for (int j = Cx - 3; j <= Cx + 3; ++j) {
+					if (j < 0)
+						J = 0;
+					else if (j > 9)
+						J = 9;
+					else
+						J = j;
+					gamerShipsMap[I][J] = '-';
+				}
+			}
+			gamerShipsMap[Cy][Cx] = '*';
+			gamerShipsMap[Cy][Cx + 1] = '*';
+			gamerShipsMap[Cy][Cx - 1] = '*';
+			gamerShipsMap[Cy][Cx + 2] = '*';
+			gamerShipsMap[Cy][Cx - 2] = '*';
+			n++;
+		}
+
+
+	} while (n == 0);
 }
 
 void arrangementOfShipsGamer() {
@@ -1335,396 +1922,24 @@ void arrangementOfShipsGamer() {
 				gamerShipsMap[i][j] = 0;
 			}
 		}
-
-		//////////////////////////////////////////////////////// постройка одного однопалубного корабля ////////////////////////////////////////
 		int n = 0;
-		do {
-			// очистка поля игрока
 
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-			if (gamerShipsMap[Cy][Cx] == 0) {
-				for (int i = Cy - 1; i < Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j < Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-'; // отметка зоны равной одной клетке вокруг корабля
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				n++;
-			}
-			else {
-				continue;
-			}
-		} while (n == 0);
+		arrangementOfShipsGamer_4(n, Cx, Cy);
 
-		/////////////////////////////////////////////////////// постройка одного двухпалубного корабля ///////////////////////////////////////////
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
+		arrangementOfShipsGamer_5(n, Cx, Cy);
 
-			if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0)) { // берём координату выше на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
+		arrangementOfShipsGamer_3(n, Cx, Cy);
+		arrangementOfShipsGamer_3(n, Cx, Cy);
+		
+		arrangementOfShipsGamer_2(n, Cx, Cy);
+		arrangementOfShipsGamer_2(n, Cx, Cy);
+		arrangementOfShipsGamer_2(n, Cx, Cy);
 
-				for (int i = Cy - 1 - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy - 1][Cx] = '*';
-				n++;
-			}
-			// если точка Сy - 1 занята то берём другую точку и проверяем
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0)) {// берём координату ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy; i <= Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy + 1][Cx] = '*';
-				n++;
-			}
-			// если точка Сy + 1 занята то берём другую точку и проверяем
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx + 1] = '*';
-				n++;
-			}
-			// если точка Сx + 1 занята то берём другую точку и проверяем
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 2; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx - 1] = '*';
-				n++;
-			}
-
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка трёхпалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1 - 1; i <= Cy + 1 + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy - 1][Cx] = '*';
-				gamerShipsMap[Cy + 1][Cx] = '*';
-				n++;
-			}
-			// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1 - 1; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx + 1] = '*';
-				gamerShipsMap[Cy][Cx - 1] = '*';
-				n++;
-			}
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка четырёхпалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && gamerShipsMap[Cy + 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 2; i <= Cy + 3; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy - 1][Cx] = '*';
-				gamerShipsMap[Cy + 1][Cx] = '*';
-				gamerShipsMap[Cy + 2][Cx] = '*';
-				n++;
-			}
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy - 2 >= 0 && gamerShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 3; i <= Cy + 2; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy - 1][Cx] = '*';
-				gamerShipsMap[Cy - 2][Cx] = '*';
-				gamerShipsMap[Cy + 1][Cx] = '*';
-				n++;
-			}
-
-			// если точка Сy - 1  и Сy + 1 занята то проверяем Cx - 1 и Cx + 1
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) && (Cx - 2 >= 0 && gamerShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 3; j <= Cx + 2; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx + 1] = '*';
-				gamerShipsMap[Cy][Cx - 1] = '*';
-				gamerShipsMap[Cy][Cx - 2] = '*';
-				n++;
-			}
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) && (Cx + 2 <= 9 && gamerShipsMap[Cy][Cx + 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 2; j <= Cx + 3; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx + 1] = '*';
-				gamerShipsMap[Cy][Cx - 1] = '*';
-				gamerShipsMap[Cy][Cx + 2] = '*';
-				n++;
-			}
-
-
-		} while (n == 0);
-
-		/////////////////////////////////////////////////////////////// постройка пятипалубного корабля ////////////////////////////////////////////////////////////////////////
-
-		n = 0;
-		do {
-			Cx = rand() % 10;
-			Cy = rand() % 10;
-
-			if ((gamerShipsMap[Cy][Cx] == 0) && (Cy - 1 >= 0 && gamerShipsMap[Cy - 1][Cx] == 0) && (Cy + 1 <= 9 && gamerShipsMap[Cy + 1][Cx] == 0) && (Cy + 2 <= 9 && gamerShipsMap[Cy + 2][Cx] == 0) &&
-				(Cy - 2 >= 0 && compShipsMap[Cy - 2][Cx] == 0)) { // берём координату выше и ниже на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 3; i <= Cy + 3; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 1; j <= Cx + 1; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy - 1][Cx] = '*';
-				gamerShipsMap[Cy + 1][Cx] = '*';
-				gamerShipsMap[Cy + 2][Cx] = '*';
-				gamerShipsMap[Cy - 2][Cx] = '*';
-				n++;
-			}
-
-			else if ((gamerShipsMap[Cy][Cx] == 0) && (Cx + 1 <= 9 && gamerShipsMap[Cy][Cx + 1] == 0) && (Cx - 1 >= 0 && gamerShipsMap[Cy][Cx - 1] == 0) &&
-				(Cx + 2 >= 0 && gamerShipsMap[Cy][Cx + 2] == 0) && (Cx - 2 >= 0 && gamerShipsMap[Cy][Cx - 2] == 0)) {// берём координату правее на один от точки Сy Cx и проверяем находится ли она в поле и не занято ли клетка
-
-				for (int i = Cy - 1; i <= Cy + 1; ++i) {
-					int I, J;
-					if (i < 0)
-						I = 0;
-					else if (i > 9)
-						I = 9;
-					else
-						I = i;
-					for (int j = Cx - 3; j <= Cx + 3; ++j) {
-						if (j < 0)
-							J = 0;
-						else if (j > 9)
-							J = 9;
-						else
-							J = j;
-						gamerShipsMap[I][J] = '-';
-					}
-				}
-				gamerShipsMap[Cy][Cx] = '*';
-				gamerShipsMap[Cy][Cx + 1] = '*';
-				gamerShipsMap[Cy][Cx - 1] = '*';
-				gamerShipsMap[Cy][Cx + 2] = '*';
-				gamerShipsMap[Cy][Cx - 2] = '*';
-				n++;
-			}
-
-
-		} while (n == 0);
-
+		arrangementOfShipsGamer_1(n, Cx, Cy);
+		arrangementOfShipsGamer_1(n, Cx, Cy);
+		arrangementOfShipsGamer_1(n, Cx, Cy);
+		arrangementOfShipsGamer_1(n, Cx, Cy);
+		
 		numberOfShips = 0;
 		for (int i = 0; i <= 9; ++i) {
 			for (int j = 0; j <= 9; ++j) {
@@ -1736,7 +1951,7 @@ void arrangementOfShipsGamer() {
 				}
 			}
 		}
-	} while (numberOfShips != 15);
+	} while (numberOfShips != 25);
 	//drawGamerShips();
 
 
@@ -1744,66 +1959,71 @@ void arrangementOfShipsGamer() {
 
 
 void drawCompShips() {
-	std::cout << "\x1b[36m";
-	std::cout << "++++++++++ поле Компьютера ++++++++++\n\n";
+	// фон, текст
+	Col(0, 9);
+	// x, y
+	setcur(2, 0); std::cout << "++++++++++ поле Компьютера ++++++++++\n\n";
 	// прорисовка строчки цифр по оси X
-	std::cout << "      ";
+	setcur(0, 2); std::cout << "      ";
 	for (int i = 1; i <= 10; ++i) {
 		std::cout << i << "  ";
 	}
-	std::cout << "\n";
+	
 	for (unsigned int i = 0; i < 10; ++i) {
-		std::cout << "  ";
-		std::cout << Dec_to_alpha(i + 1) << "  "; // прорисовка столбца букв по оси Y
+		setcur(3, 3 + i);
+		std::cout << Dec_to_alpha(i + 1); // прорисовка столбца букв по оси Y
 
 		for (unsigned int j = 0; j < 10; ++j) {
 			if (compShipsMap[i][j] == 0) {
-				if (j == 9) std::cout << "   |";
-				else std::cout << "   ";
+				if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+				else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
 			}
 			else if (compShipsMap[i][j] == '#') {
-				if (j == 9) std::cout << "   |";
-				else std::cout << "   ";
+				if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+				else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
 			}
 			else if (compShipsMap[i][j] == 'x') {
-				if (j == 9) std::cout << "   |";
-				else std::cout << "   ";
+				if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+				else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
 			}
 			else if (compShipsMap[i][j] == '-') {
-				if (j == 9) std::cout << "   |";
-				else std::cout << "   ";
+				if (j == 9) { setcur(32, 3 + i); std::cout << "   |"; }
+				else { setcur(5 + j * 3, 3 + i); std::cout << "   "; }
 			}
 			else if (compShipsMap[i][j] == '+') {
-				if (j == 9) std::cout << " + |";
-				else std::cout << " + ";
+				if (j == 9) { setcur(32, 3 + i); std::cout << " + |"; }
+				else { setcur(5 + j * 3, 3 + i); std::cout << " + "; }
 			}
 			else if (compShipsMap[i][j] == 'X') {
-				if (j == 9) std::cout << "[X]|";
-				else std::cout << "[X]";
+				if (j == 9) { setcur(32, 3 + i); std::cout << "[X]|"; }
+				else { setcur(5 + j*3, 3 + i); std::cout << "[X]"; }
 			}
 
 		}
-		std::cout << "\n";
 	}
-	std::cout << "  -";
+	setcur(3, 13);
 	for (int i = 0; i < 11; ++i) {
 		std::cout << "---";
 	}
-	std::cout << "\x1b[0m";
-	std::cout << std::endl;
+	Col(0, 7);
+	setcur(4, 14);
 	std::cout << "У комьютера осталось " << calcCompShips() << std::endl;
 }
 
 void drawGamerShips() {
-	std::cout << "\x1b[32m";
-	std::cout << ">>>>>>>>>>> поле Игрока <<<<<<<<<<<\n\n";
+	// фон, текст
+	Col(0, 10);
+	// x, y
+	setcur(41, 0); std::cout << ">>>>>>>>>>> поле Игрока <<<<<<<<<<<";
 	// прорисовка строчки цифр по оси X
-	std::cout << "      ";
+	setcur(39, 2); std::cout << "      ";
+	setcur(45, 2);
 	for (int i = 1; i <= 10; ++i) {
 		std::cout << i << "  ";
 	}
-	std::cout << "\n";
+	
 	for (unsigned int i = 0; i < 10; ++i) {
+		setcur(39, 3 + i);
 		std::cout << "  ";
 		std::cout << Dec_to_alpha(i + 1) << "  "; // прорисовка столбца букв по оси Y
 		for (unsigned int j = 0; j < 10; ++j) {
@@ -1829,15 +2049,13 @@ void drawGamerShips() {
 			}
 
 		}
-		std::cout << "\n";
 	}
-	std::cout << "  -";
+	setcur(39, 13);	std::cout << "  -";
 	for (int i = 0; i < 11; ++i) {
 		std::cout << "---";
 	}
-	std::cout << "\x1b[0m";
-	std::cout << std::endl;
-	std::cout << "У игрока осталось " << calcGamerShips() << std::endl;
+	Col(0, 7);
+	setcur(41, 14); std::cout << "У игрока осталось " << calcGamerShips() << std::endl;
 }
 
 void WelcomeScreen() {
@@ -1881,3 +2099,7 @@ int calcEmptyCells() {
 	}
 	return numberOfEmptyCells;
 }
+
+
+
+
